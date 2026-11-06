@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob: https://cdn.islamic.network; connect-src 'self' https://api.aladhan.com https://api.alquran.cloud; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Vakit - Namaz Vakitleri</title>
+  <meta name="theme-color" content="#161b22">
+  <meta name="description" content="Diyanet yöntemiyle namaz vakitleri, ezan, Hicri takvim, dualar, Esmâ-ül Hüsnâ, zikir ve Kur'an.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Vakit">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div id="ezanCubugu" class="ezan-cubugu" hidden>
+    <span id="ezanYazi"></span>
+    <button id="ezanBtn" type="button"></button>
+  </div>
+
+  <section id="sekme-vakit" class="icerik">
+    <div id="konum" class="konum">Yükleniyor…</div>
+    <div class="kart">
+      <div id="suanki" class="suanki"></div>
+      <div class="etiket">Sonraki vakte kalan süre</div>
+      <div id="kalan" class="kalan">-:--:--</div>
+      <div id="sonraki" class="alt"></div>
+    </div>
+    <div class="tarihler">
+      <div id="hicri" class="hap"></div>
+      <div id="miladi" class="hap"></div>
+    </div>
+    <ul id="vakitler" class="vakitler"></ul>
+    <div id="hata" class="hata" hidden></div>
+    <div id="bilgiKutu"></div>
+  </section>
+
+  <section id="sekme-takvim" class="icerik" hidden></section>
+  <section id="sekme-esma" class="icerik" hidden></section>
+  <section id="sekme-zikir" class="icerik" hidden></section>
+  <section id="sekme-dua" class="icerik" hidden></section>
+  <section id="sekme-kuran" class="icerik" hidden></section>
+  <section id="sekme-ayar" class="icerik" hidden></section>
+
+  <nav class="sekmeler" id="sekmeler">
+    <button class="sekme-btn aktif" data-sekme="vakit">Vakit</button>
+    <button class="sekme-btn" data-sekme="takvim">Takvim</button>
+    <button class="sekme-btn" data-sekme="esma">Esmâ</button>
+    <button class="sekme-btn" data-sekme="zikir">Zikir</button>
+    <button class="sekme-btn" data-sekme="dua">Dua</button>
+    <button class="sekme-btn" data-sekme="kuran">Kur'an</button>
+    <button class="sekme-btn" data-sekme="ayar" title="Ayarlar">⚙</button>
+  </nav>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
