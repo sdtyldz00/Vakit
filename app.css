@@ -201,3 +201,35 @@ button.kucuk { min-height: 36px; min-width: 40px; }
 
 /* "hidden" özniteliği, display veren kurallar tarafından ezilmesin */
 [hidden] { display: none !important; }
+
+/* ---- Kıble pusulası ---- */
+.kible-bilgi { text-align: center; font-weight: 600; margin-bottom: 6px; }
+.kible-durum { text-align: center; min-height: 24px; color: var(--vurgu); font-weight: 600; }
+.pusula { position: relative; width: min(78vw, 300px); aspect-ratio: 1; margin: 18px auto 10px; border-radius: 50%; background: var(--kart); border: 2px solid var(--cizgi); }
+.pusula.hizali { border-color: var(--vurgu); box-shadow: 0 0 0 4px rgba(63, 185, 133, 0.25); }
+.pusula-isaret { position: absolute; top: -12px; left: 50%; width: 0; height: 0; margin-left: -9px; border-left: 9px solid transparent; border-right: 9px solid transparent; border-top: 16px solid var(--uyari); z-index: 2; }
+.pusula-kadran { position: absolute; inset: 0; border-radius: 50%; transition: transform 0.12s linear; }
+.pusula-etiket { position: absolute; font-weight: 700; color: var(--soluk); }
+.pusula-etiket.k { top: 8px; left: 50%; transform: translateX(-50%); color: #e5534b; }
+.pusula-etiket.g { bottom: 8px; left: 50%; transform: translateX(-50%); }
+.pusula-etiket.d { right: 12px; top: 50%; transform: translateY(-50%); }
+.pusula-etiket.b { left: 12px; top: 50%; transform: translateY(-50%); }
+.kible-ibre { position: absolute; inset: 0; }
+.kible-kabe { position: absolute; top: 26px; left: 50%; transform: translateX(-50%); font-size: 30px; }
+.kible-cizgi { position: absolute; top: 66px; bottom: 50%; left: 50%; width: 4px; margin-left: -2px; background: var(--vurgu); border-radius: 2px; }
+
+/* ---- Zikir sekmesindeki alt bölümler ---- */
+.alt-sekmeler { display: flex; gap: 6px; margin-bottom: 12px; }
+.alt-sekme { flex: 1; background: var(--kart); border: 1px solid var(--cizgi); color: var(--soluk); }
+.alt-sekme.aktif { color: var(--vurgu); border-color: var(--vurgu); font-weight: 600; }
+
+/* ---- Günün ayeti ve duası ---- */
+.gunun-kart { margin-top: 12px; }
+.gunun-kart .dua-ar { margin: 8px 0; }
+.gunun-tum { margin-top: 10px; }
+
+/* ---- İkon seçimi ---- */
+.ikon-izgara { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0; }
+.ikon-sec { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; background: var(--kart); border: 2px solid var(--cizgi); font-size: 12px; min-height: 0; }
+.ikon-sec img { border-radius: 12px; }
+.ikon-sec.aktif { border-color: var(--vurgu); }

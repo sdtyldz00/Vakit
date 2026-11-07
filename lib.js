@@ -22,6 +22,7 @@ export const GUNLER = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe',
 
 export const DEFAULTS = {
   address: 'Gebze, Kocaeli, Turkey',
+  coords: null, // GPS ile bulunan konum: { lat, lon }
   hijriAdj: 0,
   hanefi: false,
   offsets: {},
@@ -33,11 +34,21 @@ export const DEFAULTS = {
   kuran: { sure: 1, meal: 'tr.diyanet' },
 };
 
+// Enlem/boylamı doğrular; geçersizse null döner. 3 basamağa yuvarlanır (yaklaşık 100 m).
+function temizKoordinat(c) {
+  if (!c || typeof c !== 'object' || c.lat == null || c.lon == null) return null;
+  const lat = Number(c.lat);
+  const lon = Number(c.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+  return { lat: Math.round(lat * 1000) / 1000, lon: Math.round(lon * 1000) / 1000 };
+}
+
 // Depodan gelen ya da kullanıcıdan alınan ayarları doğrular; bozuk değerleri düzeltir.
 export function temizleAyarlar(ham) {
   const k = ham && typeof ham === 'object' ? ham : {};
   const out = {
     address: temizMetin(k.address, 100) || DEFAULTS.address,
+    coords: temizKoordinat(k.coords),
     hijriAdj: sinirla(k.hijriAdj, -3, 3),
     hanefi: Boolean(k.hanefi),
     offsets: {},
@@ -86,13 +97,26 @@ export function vakitAdi(v, date) {
 // Belirli bir günün vakitlerini getirir (önbellekli, doğrulamalı).
 export async function fetchDay(d, settings) {
   const ds = dateStr(d);
-  const key = `gun2|${settings.address}|${settings.hanefi ? 1 : 0}|${ds}`;
+  const konum = settings.coords ? `${settings.coords.lat},${settings.coords.lon}` : settings.address;
+  const key = `gun2|${konum}|${settings.hanefi ? 1 : 0}|${ds}`;
   const cached = await chrome.storage.local.get(key);
   if (cached[key]) return cached[key];
 
-  const url =
-    `https://api.aladhan.com/v1/timingsByAddress/${ds}` +
-    `?address=${encodeURIComponent(settings.address)}&method=13&school=${settings.hanefi ? 1 : 0}`;
+  const okul = settings.hanefi ? 1 : 0;
+  let url;
+  if (settings.coords) {
+    // GPS konumu: saat dilimi olarak cihazın dilimi verilir, böylece vakitler telefonun saatine göre gelir.
+    let dilim = '';
+    try { dilim = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { dilim = ''; }
+    url =
+      `https://api.aladhan.com/v1/timings/${ds}` +
+      `?latitude=${settings.coords.lat}&longitude=${settings.coords.lon}&method=13&school=${okul}` +
+      (dilim ? `&timezonestring=${encodeURIComponent(dilim)}` : '');
+  } else {
+    url =
+      `https://api.aladhan.com/v1/timingsByAddress/${ds}` +
+      `?address=${encodeURIComponent(settings.address)}&method=13&school=${okul}`;
+  }
   const j = await guvenliJson(url);
   if (!j || j.code !== 200 || !j.data || typeof j.data.timings !== 'object') {
     throw new Error('Vakitler alınamadı. Konum adını kontrol edin.');

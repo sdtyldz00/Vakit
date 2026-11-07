@@ -2,6 +2,7 @@ import { VAKITLER, getSettings, saveSettings, getState, temizleAyarlar } from '.
 import { el } from './ui.js';
 import { sesKaydet, sesGetir, sesSil } from './ses.js';
 import { temizMetin } from './guvenlik.js';
+import { IKONLAR, ikonBul } from './ikonlar.js';
 
 const MAKS_SES = 10 * 1024 * 1024; // 10 MB
 
@@ -40,6 +41,44 @@ export async function baslat(kap) {
   // Konum
   const adres = el('input', { type: 'text', maxlength: '100', class: 'metin', placeholder: 'Örn: Gebze, Kocaeli, Turkey' });
   adres.value = calisma.address;
+
+  // GPS ile konum
+  const konumDurum = el('div', { class: 'not' });
+  const adreseDon = el('button', {
+    type: 'button',
+    class: 'ikincil',
+    text: 'Şehir adına dön',
+    onclick: () => { calisma.coords = null; konumGuncelle(); },
+  });
+  function konumGuncelle() {
+    if (calisma.coords) {
+      konumDurum.textContent = `GPS konumu kullanılıyor (${calisma.coords.lat}, ${calisma.coords.lon}). Kaydetmeyi unutmayın.`;
+    } else {
+      konumDurum.textContent = 'Şu an yukarıdaki şehir adı kullanılıyor.';
+    }
+    adreseDon.hidden = !calisma.coords;
+  }
+  const gpsBtn = el('button', {
+    type: 'button',
+    class: 'ikincil',
+    text: '📍 Konumumu bul',
+    onclick: () => {
+      if (!navigator.geolocation) { konumDurum.textContent = 'Bu cihaz konum özelliğini desteklemiyor.'; return; }
+      konumDurum.textContent = 'Konum alınıyor…';
+      navigator.geolocation.getCurrentPosition(
+        (p) => {
+          calisma.coords = { lat: p.coords.latitude, lon: p.coords.longitude };
+          konumGuncelle();
+        },
+        (hata) => {
+          konumDurum.textContent = hata && hata.code === 1
+            ? 'Konum izni verilmedi. iPhone: Ayarlar ▸ Gizlilik ve Güvenlik ▸ Konum Servisleri bölümünden Safari/Vakit için izin verin.'
+            : 'Konum alınamadı. Açık havada ya da internet bağlantısı varken tekrar deneyin.';
+        },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 },
+      );
+    },
+  });
 
   const hanefi = kutu(calisma.hanefi, (d) => { calisma.hanefi = d; });
 
@@ -130,6 +169,34 @@ export async function baslat(kap) {
     if (deneme) deneme.a.volume = calisma.ezan.ses;
   });
 
+  // Uygulama ikonu
+  const ikonKutu = el('div', { class: 'ikon-izgara' });
+  const ikonNot = el('div', { class: 'not' });
+  async function ikonCiz() {
+    const { ikon } = await chrome.storage.local.get('ikon');
+    const secili = ikonBul(ikon).id;
+    ikonKutu.replaceChildren();
+    for (const k of IKONLAR) {
+      const dugme = el(
+        'button',
+        {
+          type: 'button',
+          class: 'ikon-sec' + (k.id === secili ? ' aktif' : ''),
+          title: k.ad,
+          onclick: async () => {
+            document.dispatchEvent(new CustomEvent('ikon-sec', { detail: k.id }));
+            ikonNot.textContent = `“${k.ad}” seçildi. Ana ekranda değişmesi için uygulamayı ana ekrandan silip, adresi Safari/Chrome'da açarak yeniden “Ana Ekrana Ekle” yapın.`;
+            await new Promise((r) => setTimeout(r, 50));
+            ikonCiz();
+          },
+        },
+        el('img', { src: `icons/ikon-${k.id}-180.png`, alt: k.ad, width: '56', height: '56' }),
+        el('span', { text: k.ad }),
+      );
+      ikonKutu.append(dugme);
+    }
+  }
+
   // Kaydet / geri
   const mesaj = el('div', { class: 'not' });
   const kaydet = el('button', {
@@ -163,6 +230,8 @@ export async function baslat(kap) {
 
   kap.replaceChildren(
     el('label', { class: 'alan' }, 'Konum (şehir, ilçe, ülke)', adres),
+    el('div', { class: 'satir ara' }, gpsBtn, adreseDon),
+    konumDurum,
     el('div', { class: 'not', text: 'Hesaplama yöntemi: Türkiye Diyanet İşleri Başkanlığı' }),
     el('label', { class: 'onay' }, hanefi, 'Hanefi mezhebine göre geç ikindi'),
     el('div', { class: 'alan' }, 'Hicri gün ayarı', sayac(calisma.hijriAdj, (x) => { calisma.hijriAdj = x; }, -3, 3)),
@@ -173,8 +242,14 @@ export async function baslat(kap) {
     dosya,
     el('div', { class: 'satir ara' }, dene, durdur, kaldir),
     el('label', { class: 'alan' }, 'Ses düzeyi', seviye),
+    el('div', { class: 'baslik', text: 'Uygulama ikonu' }),
+    ikonKutu,
+    ikonNot,
+    el('div', { class: 'not', text: 'İkon, uygulamayı ana ekrana eklerken kullanılır. Eklenmiş bir uygulamanın ikonu sonradan değişmez; yeniden eklemek gerekir. Android’de ikon yükleme anındaki hâliyle kalır.' }),
     mesaj,
     el('div', { class: 'satir ara' }, geri, kaydet),
   );
   sesBilgiGuncelle();
+  konumGuncelle();
+  ikonCiz();
 }

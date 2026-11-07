@@ -2,15 +2,16 @@ import { mesajDinle } from './platform.js'; // chrome.* uyarlayıcısı, diğer 
 import { getSettings, getState, formatHMS, formatHM, miladiMetin, hicriMetin } from './lib.js';
 import { sesGetir } from './ses.js';
 import { el } from './ui.js';
+import { ikonUygula, ikonBul } from './ikonlar.js';
 
 const $ = (id) => document.getElementById(id);
 
 // ---------------- Sekmeler ----------------
 const MODULLER = {
+  kible: () => import('./kible.js'),
   takvim: () => import('./takvim.js'),
-  esma: () => import('./esma.js'),
-  zikir: () => import('./zikir.js'),
   dua: () => import('./dua.js'),
+  zikir: () => import('./zikirEsma.js'),
   kuran: () => import('./kuran.js'),
   ayar: () => import('./ayarlar.js'),
 };
@@ -65,7 +66,7 @@ async function yukle() {
   calisiyor = true;
   try {
     const ayarlar = await getSettings();
-    $('konum').textContent = ayarlar.address;
+    $('konum').textContent = ayarlar.coords ? '📍 Konumum (GPS)' : ayarlar.address;
     durum = await getState(new Date(), ayarlar);
     hataGoster('');
     listeCiz();
@@ -213,7 +214,16 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
     yukle();
     vakitKontrol();
+    gununKartlari();
   }
+});
+
+// Kayıtlı ikon seçimini uygula; ayarlardan yeni seçim gelince kaydet ve uygula.
+chrome.storage.local.get('ikon').then((o) => ikonUygula(o.ikon));
+document.addEventListener('ikon-sec', (e) => {
+  const k = ikonBul(e.detail);
+  chrome.storage.local.set({ ikon: k.id });
+  ikonUygula(k.id);
 });
 
 mesajDinle((m) => {
@@ -309,5 +319,14 @@ if ('serviceWorker' in navigator) {
 }
 
 bilgiKutusuCiz();
+function gununKartlari() {
+  import('./gunun.js')
+    .then((m) => m.baslat($('gunun')))
+    .catch(() => {});
+}
+
 // Önce vakitler yüklensin (önbelleğe yazılsın), sonra ezan/bildirim kontrolü yapılsın: tek ağ isteği olur.
-yukle().then(vakitKontrol);
+yukle().then(() => {
+  vakitKontrol();
+  gununKartlari();
+});

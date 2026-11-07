@@ -29,3 +29,13 @@ Yerelde denemek için: `python3 -m http.server 8000` ile bu klasörü sunup bilg
 ## Güncelleme
 Dosyaları aynı adrese yeniden yükleyin. Uygulama bir sonraki açılışta yeni sürümü alır (gerekirse bir kez kapatıp açın).
 Önbellek sürümünü sw.js içindeki `SURUM` değerini artırarak yenileyebilirsiniz.
+
+## Yeni özellikler (sürüm 2)
+
+- **Günün duası ve ayeti**: Vakit ekranının altında. Dua uygulamanın içinden, ayet alquran.cloud'dan gelir (internet gerekir, günlük önbelleğe alınır). Ayetler ve duaların günlük sırası uygulama içinde sabit bir listeden döner.
+- **Kıble pusulası**: Kıble sekmesi. Konumdan Kâbe yönü ve mesafe hesaplanır; "Pusulayı başlat" ile telefonun sensörü kullanılır. iPhone'da hareket/yön izni ister. Telefonu yere paralel tutun; birkaç derece sapma olabilir.
+- **Konumumu bul (GPS)**: Ayarlar ▸ Konum. Koordinatla vakit çeker. İzin verilmezse şehir adı kullanılır.
+- **Uygulama ikonu**: Ayarlar ▸ Uygulama ikonu (4 seçenek). Seçim ana ekrana ekleme sırasında kullanılır; eklenmiş uygulamanın ikonu sonradan değişmez, silip yeniden ekleyin.
+
+## Güncelleme nasıl yapılır
+GitHub'da repoya girin ▸ Add file ▸ Upload files ▸ bu klasördeki tüm dosyaları ve `icons` klasörünü sürükleyin ▸ Commit changes. Birkaç dakika sonra uygulamayı kapatıp açın (yeni sürüm bir sonraki açılışta gelir).
