@@ -12,7 +12,7 @@ const MODULLER = {
   takvim: () => import('./takvim.js'),
   dua: () => import('./dua.js'),
   zikir: () => import('./zikirEsma.js'),
-  kuran: () => import('./kuran.js'),
+  kuran: () => import('./kuranSekme.js'),
   ayar: () => import('./ayarlar.js'),
 };
 const baslatilan = new Set();

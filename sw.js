@@ -1,13 +1,16 @@
 // Servis çalışanı: uygulamayı çevrimdışı açar ve bildirime tıklanınca uygulamayı öne getirir.
 // Yalnızca kendi dosyalarını önbelleğe alır; API ve ses istekleri ağdan gider.
 
-const SURUM = 'vakit-v2';
+const SURUM = 'vakit-v3';
 // Uygulamanın çalışması için şart olan dosyalar: biri bile eksikse kurulum başarısız olur.
 const DOSYALAR = [
   './', 'index.html', 'app.css', 'app.js', 'platform.js', 'lib.js', 'guvenlik.js', 'hicri.js', 'ses.js', 'ui.js',
   'takvim.js', 'esma.js', 'esma-verisi.js', 'zikir.js', 'zikir-verisi.js', 'zikirEsma.js', 'kuran.js', 'dua.js',
-  'dua-verisi.js', 'ayarlar.js', 'kible.js', 'gunun.js', 'ikonlar.js', 'manifest.webmanifest',
+  'dua-verisi.js', 'ayarlar.js', 'kible.js', 'gunun.js', 'ikonlar.js', 'kuranSekme.js', 'ogren.js', 'ogren-verisi.js', 'manifest.webmanifest',
 ];
+
+// Harf sesleri (çevrimdışı çalışsın diye önbelleğe alınır; eksik olsa da uygulama kurulur).
+const SESLER = ['0627', '0628', '062A', '062B', '062C', '062D', '062E', '062F', '0630', '0631', '0632', '0633', '0634', '0635', '0636', '0637', '0638', '0639', '063A', '0641', '0642', '0643', '0644', '0645', '0646', '0647', '0648', '064A'].map((k) => `ses/harf/${k}.mp3`);
 
 // İkonlar isteğe bağlıdır: yüklenmemiş olsalar bile uygulama kurulur ve çalışır.
 const IKONLAR = [
@@ -21,7 +24,7 @@ self.addEventListener('install', (e) => {
     caches.open(SURUM)
       .then(async (c) => {
         await c.addAll(DOSYALAR);
-        await Promise.all(IKONLAR.map((f) => c.add(f).catch(() => {})));
+        await Promise.all([...IKONLAR, ...SESLER].map((f) => c.add(f).catch(() => {})));
       })
       .then(() => self.skipWaiting()),
   );
@@ -34,6 +37,29 @@ self.addEventListener('activate', (e) => {
       .then(() => self.clients.claim()),
   );
 });
+
+// Safari ses/video dosyalarını parça parça (Range) ister; önbellekteki dosyadan 206 yanıtı üretir.
+async function aralikYaniti(yanit, aralik) {
+  const m = /^bytes=(\d*)-(\d*)$/.exec(aralik);
+  if (!m || (m[1] === '' && m[2] === '')) return yanit;
+  const govde = await yanit.clone().arrayBuffer();
+  const toplam = govde.byteLength;
+  let bas;
+  let son;
+  if (m[1] === '') { bas = Math.max(0, toplam - Number(m[2])); son = toplam - 1; }
+  else { bas = Number(m[1]); son = m[2] === '' ? toplam - 1 : Math.min(Number(m[2]), toplam - 1); }
+  if (bas > son || bas >= toplam) {
+    return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${toplam}` } });
+  }
+  return new Response(govde.slice(bas, son + 1), {
+    status: 206,
+    headers: {
+      'Content-Type': yanit.headers.get('Content-Type') || 'audio/mpeg',
+      'Content-Range': `bytes ${bas}-${son}/${toplam}`,
+      'Content-Length': String(son - bas + 1),
+    },
+  });
+}
 
 // Önce önbellekten ver, arkada güncelle (bir sonraki açılışta yeni sürüm gelir).
 self.addEventListener('fetch', (e) => {
@@ -51,7 +77,10 @@ self.addEventListener('fetch', (e) => {
           return yanit;
         })
         .catch(() => null);
-      if (kayitli) return kayitli;
+      if (kayitli) {
+        const aralik = istek.headers.get('range');
+        return aralik ? aralikYaniti(kayitli, aralik) : kayitli;
+      }
       const yanit = await ag;
       if (yanit) return yanit;
       if (istek.mode === 'navigate') return (await cache.match('index.html')) || Response.error();

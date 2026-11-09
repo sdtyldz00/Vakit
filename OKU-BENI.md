@@ -39,3 +39,10 @@ Dosyaları aynı adrese yeniden yükleyin. Uygulama bir sonraki açılışta yen
 
 ## Güncelleme nasıl yapılır
 GitHub'da repoya girin ▸ Add file ▸ Upload files ▸ bu klasördeki tüm dosyaları ve `icons` klasörünü sürükleyin ▸ Commit changes. Birkaç dakika sonra uygulamayı kapatıp açın (yeni sürüm bir sonraki açılışta gelir).
+
+## Okumayı öğren (sürüm 3)
+Kur'an sekmesi ▸ "Okumayı öğren": 28 harf (dokununca adını sesli okur, başta/ortada/sonda biçimleri, "öğrendim" işareti), harekeler (üstün, esre, ötre, cezm, şedde, tenvin, med), namaz sureleri (Fâtiha, İhlâs, Felak, Nâs, Kevser, Asr: Arapça + okunuş + anlam) ve 10 soruluk sınav.
+- Harf sesleri uygulamanın içindedir (`ses/harf/`), internet gerekmez. Kaynak: elsanussi-s-mneina/arabic-alphabet-audio-speller-html-js (MIT lisansı, `ses/harf/LICENSE.txt`). Kayıtlar harflerin adlarını okur.
+- Hece, kelime ve ayet seslendirmesi yoktur. Ayetleri dinlemek için Kur'an ▸ Sureler kullanılır (internet gerekir).
+- Sure metinleri ve okunuşları elle yazılmıştır; Kur'an ▸ Sureler ile ya da bir hocayla karşılaştırın.
+- GitHub'a yüklerken yeni `ses` klasörünü de sürükleyin.
